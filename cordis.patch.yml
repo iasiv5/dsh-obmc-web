@@ -1,0 +1,3 @@
+# dsh-obmc-web bundle patch: mounts the host half (webServer routes) into
+# the profile's plugin tree.
+- insert: [{ id: obmc-web, name: '@iasiv5/dsh-obmc-web' }]

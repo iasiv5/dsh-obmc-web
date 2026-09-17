@@ -1,0 +1,20 @@
+[Unit]
+Description=SSH local-forward relay to the BMC Web UI via jump host
+# Local port 18443 -> (over ssh to the jump host) -> BMC $BMC_TARGET
+# Binds loopback only — the DSH GUI's same-origin proxy is the only client.
+# BMC_TARGET can be overridden by relay.env (rewritten in place by the
+# @iasiv5/dsh-obmc-web plugin's SSH discovery when the DHCP-assigned BMC
+# address changes). Install as ~/.config/systemd/user/obmc-web-relay.service.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=BMC_TARGET=192.0.2.10:443
+EnvironmentFile=-%h/.config/systemd/user/obmc-relay.env
+ExecStart=/usr/bin/ssh -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o BatchMode=yes -N -L 127.0.0.1:18443:${BMC_TARGET} -p 22 user@jump.example.net
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

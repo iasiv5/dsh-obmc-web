@@ -1,0 +1,57 @@
+{
+  "name": "@iasiv5/dsh-obmc-web",
+  "version": "0.1.0",
+  "description": "BMC Web UI in the DSH sidebar: same-origin host proxy riding an SSH local-forward relay (obmc-web-relay), plus a Settings launcher panel (peer of dsh-surf).",
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/",
+    "cordis.patch.yml",
+    "deploy/",
+    "README.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "author": "iasiv5",
+  "homepage": "https://github.com/iasiv5/dsh-obmc-web#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iasiv5/dsh-obmc-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/iasiv5/dsh-obmc-web/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "openbmc",
+    "bmcweb",
+    "redfish",
+    "same-origin-proxy",
+    "settings-section"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout"
+      ]
+    }
+  }
+}
