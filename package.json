@@ -1,7 +1,7 @@
 {
   "name": "@iasiv5/dsh-obmc-web",
-  "version": "0.1.0",
-  "description": "BMC Web UI in the DSH sidebar: same-origin host proxy riding an SSH local-forward relay (obmc-web-relay), plus a Settings launcher panel.",
+  "version": "0.1.1",
+  "description": "OpenBMC 控制台入口：设置一级菜单「BMC 控制台」面板一键在顶层标签页打开 BMC Web UI，同源代理经 SSH 本地转发 relay（obmc-web-relay）抵达 BMC，BMC IP 变化自动探测并重定向隧道；需 SSH 跳板机可达 BMC。",
   "type": "module",
   "main": "./lib/index.js",
   "exports": {
