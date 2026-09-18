@@ -123,6 +123,12 @@ bootstrap），地址仍会写入配置并提示下一步去点「安装并启�
   `WWW-Authenticate`（防止 bmcweb 的 401 Basic challenge 弹浏览器原生
   凭据框；BMC SPA 走 POST /login JSON + cookie），CSP 仅移除
   `frame-ancestors` 指令；其余（含 Cookie）原样透传。
+- 非 `/login` 的上游 401 统一降级为 403：BMC SPA 的 axios 拦截器对其他
+  401 会执行 `window.location = "/login"`——根绝对路径的顶层导航，在
+  同源代理下会逃出 `/bmc` 前缀，落到 GUI 自己的 `/login` 并被认证门
+  重定向进 DSH 应用，把用户从 BMC 控制台拽走（首次打开最常见）。403
+  走 SPA 的原地「未授权」提示，不发生导航；`/login` 的真实 401 保留
+  （登录表单错误处理与 CSRF 探测依赖它）。
 - 不在任何地方存储 BMC 凭据；登录在 BMC 自身页面完成。
 - 信任围栏仿照 dsh-better-sidebar 的 trust-fence（Host 必须是 loopback
   或部署信任的 authority、`Sec-Fetch-Site` 不得为 cross-site、Origin 若有
