@@ -4,7 +4,9 @@ Description=SSH local-forward relay to the BMC Web UI via jump host
 # Binds loopback only — the DSH GUI's same-origin proxy is the only client.
 # BMC_TARGET can be overridden by relay.env (rewritten in place by the
 # @iasiv5/dsh-obmc-web plugin's SSH discovery when the DHCP-assigned BMC
-# address changes). Install as ~/.config/systemd/user/obmc-web-relay.service.
+# address changes). Install as ~/.config/systemd/user/obmc-web-relay.service
+# — or just click「安装并启动 relay 服务」in the plugin's Settings panel,
+# which generates this unit from the current configuration.
 After=network-online.target
 Wants=network-online.target
 

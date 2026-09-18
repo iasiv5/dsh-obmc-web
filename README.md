@@ -39,9 +39,23 @@ dsh plugin --profile web add link:/path/to/dsh-obmc-web
 
 ## 配置
 
-插件与 relay unit 共用一份 `KEY=VALUE` 配置文件
-`~/.config/systemd/user/obmc-relay.env`（可用环境变量 `OBMC_WEB_ENV`
-改位置；模板见 `deploy/relay.env.example`）：
+**推荐方式：全部在网页里完成。** 首次安装后打开「设置 → BMC 控制台」，
+展开「部署配置」表单：
+
+1. 填 **BMC 地址**（`ip` 或 `ip:port`，端口缺省 443）与 **SSH 跳板机**
+   （`user@host`，可选；用于 IP 自动探测）、SSH 端口、链路网段（可空，
+   默认取 BMC IP 的 /24）、relay 本地端口（默认 18443，被占用时才需要改）；
+2. 点 **保存配置**——值经校验后写入共享 env 文件（原地更新对应行，注释
+   与未知键保留）；影响隧道的键变化且 relay 在运行时会自动重启并验证；
+3. 新机器上点 **安装并启动 relay 服务**——插件按当前配置生成
+   `~/.config/systemd/user/obmc-web-relay.service`，daemon-reload 并启动，
+   隧道验证通过后报告。之后升级配置也用同一个按钮。
+
+**手动方式（高级）**：配置实际存储在插件与 relay unit 共用的
+`KEY=VALUE` 文件 `~/.config/systemd/user/obmc-relay.env`（可用环境变量
+`OBMC_WEB_ENV` 改位置）。首次启动若文件不存在，插件自动生成一份全注释
+的模板（含说明与文档示例地址）；手改后重启 dsh web 生效。模板见
+`deploy/relay.env.example`：
 
 | 键 | 必填 | 说明 |
 |---|---|---|
@@ -49,14 +63,11 @@ dsh plugin --profile web add link:/path/to/dsh-obmc-web
 | `OBMC_SSH_TARGET` | 否 | 自动探测用的跳板机 SSH 目标 `user@host`（需已配好 BatchMode 免密）；不配则探测功能关闭，代理不受影响 |
 | `OBMC_SSH_PORT` | 否 | 跳板机 SSH 端口，默认 22 |
 | `OBMC_SUBNET` | 否 | 探测扫描的链路网段 `a.b.c`，缺省取 `BMC_TARGET` IP 的 /24 |
+| `OBMC_RELAY_PORT` | 否 | relay 本地监听端口，默认 18443，需与 relay unit 的 `-L` 参数一致 |
 
-代码本身不含任何站点相关默认值——你的网络拓扑只活在这份 env 文件里。
-配置在 dsh web 启动时读取，改动后需重启。
-
-relay unit 参考配置见 `deploy/obmc-web-relay.service.example`（安装到
-`~/.config/systemd/user/obmc-web-relay.service`，`systemctl --user
-enable --now obmc-web-relay.service`）。SSH 目标、端口、BMC 地址都在
-unit 内或 env 文件里占位，按你的部署填写。
+代码本身不含任何站点相关默认值——你的网络拓扑只活在这份配置里（表单
+和 env 文件是同一份数据的两个入口）。DSH 自身的 3080、公网反代端口等
+属于 DSH/网关层，与本插件无关，无需在此配置。
 
 ## BMC IP 自动探测
 
