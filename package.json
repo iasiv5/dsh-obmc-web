@@ -1,7 +1,7 @@
 {
   "name": "@iasiv5/dsh-obmc-web",
   "version": "0.1.0",
-  "description": "BMC Web UI in the DSH sidebar: same-origin host proxy riding an SSH local-forward relay (obmc-web-relay), plus a Settings launcher panel (peer of dsh-surf).",
+  "description": "BMC Web UI in the DSH sidebar: same-origin host proxy riding an SSH local-forward relay (obmc-web-relay), plus a Settings launcher panel.",
   "type": "module",
   "main": "./lib/index.js",
   "exports": {
