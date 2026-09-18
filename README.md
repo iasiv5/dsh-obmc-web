@@ -121,7 +121,11 @@ bootstrap），地址仍会写入配置并提示下一步去点「安装并启�
 - 上游仅 `127.0.0.1`（SSH 隧道，端口默认 18443），不新增任何公网监听。
 - 剥掉的响应头：`X-Frame-Options`、`Strict-Transport-Security`、
   `WWW-Authenticate`（防止 bmcweb 的 401 Basic challenge 弹浏览器原生
-  凭据框；BMC SPA 走 POST /login JSON + cookie），CSP 仅移除
+  凭据框；BMC SPA 走 POST /login JSON + cookie）、`Clear-Site-Data`
+  （bmcweb 登出会发 `Clear-Site-Data: "cache","cookies","storage"`，语义
+  是清空整个源的 Cookie 与存储——在同源代理下会连带清掉 GUI 自身的会话
+  Cookie，把 DSH 一起登出；BMC 侧登出不受影响：显式的 `SESSION=` 过期
+  Set-Cookie 照常透传，服务端会话照常销毁），CSP 仅移除
   `frame-ancestors` 指令；其余（含 Cookie）原样透传。
 - 非 `/login` 的上游 401 统一降级为 403：BMC SPA 的 axios 拦截器对其他
   401 会执行 `window.location = "/login"`——根绝对路径的顶层导航，在
