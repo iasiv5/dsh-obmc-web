@@ -1,0 +1,41 @@
+# Publish @iasiv5/dsh-obmc-web to npm via Trusted Publishing (OIDC).
+#
+# No long-lived NPM_TOKEN secret involved: the job's OIDC identity is
+# exchanged with registry.npmjs.org directly. Prerequisite (one-time, on
+# npmjs.com → package → Settings → Publishing access → Trusted Publisher):
+#   repository owner : iasiv5
+#   repository name  : dsh-obmc-web
+#   workflow filename: publish.yml
+#   environment      : (leave empty)
+#
+# Release flow: bump version in package.json → tag v<version> → push tag.
+# npm >= 11.5.1 is required for OIDC-based publishing; node 24 already
+# ships a suitable npm, the install step just pins the newest one.
+
+name: publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  id-token: write # OIDC — the whole point of this workflow
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Pin npm with trusted-publishing support
+        run: npm install -g npm@latest
+
+      - name: Publish
+        run: npm publish --provenance --access public
