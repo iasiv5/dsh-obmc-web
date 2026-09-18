@@ -42,14 +42,16 @@ dsh plugin --profile web add link:/path/to/dsh-obmc-web
 **推荐方式：全部在网页里完成。** 首次安装后打开「设置 → BMC 控制台」，
 展开「部署配置」表单：
 
-1. 填 **BMC 地址**（`ip` 或 `ip:port`，端口缺省 443）与 **SSH 跳板机**
-   （`user@host`，可选；用于 IP 自动探测）、SSH 端口、链路网段（可空，
-   默认取 BMC IP 的 /24）、relay 本地端口（默认 18443，被占用时才需要改）；
-2. 点 **保存配置**——值经校验后写入共享 env 文件（原地更新对应行，注释
-   与未知键保留）；影响隧道的键变化且 relay 在运行时会自动重启并验证；
-3. 新机器上点 **安装并启动 relay 服务**——插件按当前配置生成
+1. 填 **SSH 跳板机**（`user@host`；与 BMC 链路网段相通、已配好对本机
+   BatchMode 免密登录的机器）与 SSH 端口；**BMC 地址可以留空**；
+   链路网段、relay 本地端口（默认 18443）均可留空用默认；
+2. 点 **「探测 BMC IP」**——先保存表单，再 SSH 登录跳板机自动发现
+   bmcweb 地址并回填；BMC IP 被 DHCP 改变后，也用同一个按钮重新找回
+   并切换隧道；
+3. 点 **「安装并启动 relay 服务」**——插件按当前配置生成
    `~/.config/systemd/user/obmc-web-relay.service`，daemon-reload 并启动，
-   隧道验证通过后报告。之后升级配置也用同一个按钮。
+   隧道验证通过后报告；若配置的 relay 端口被其他程序占用，会自动顺延到
+   空闲端口并提示。之后升级配置也用同一个按钮。
 
 **手动方式（高级）**：配置实际存储在插件与 relay unit 共用的
 `KEY=VALUE` 文件 `~/.config/systemd/user/obmc-relay.env`（可用环境变量
@@ -59,24 +61,27 @@ dsh plugin --profile web add link:/path/to/dsh-obmc-web
 
 | 键 | 必填 | 说明 |
 |---|---|---|
-| `BMC_TARGET` | 是 | 当前 BMC 地址 `ip:port`，relay unit 的 ExecStart 消费；自动探测会原地改写此行（保留其他键） |
-| `OBMC_SSH_TARGET` | 否 | 自动探测用的跳板机 SSH 目标 `user@host`（需已配好 BatchMode 免密）；不配则探测功能关闭，代理不受影响 |
+| `BMC_TARGET` | 是* | 当前 BMC 地址 `ip:port`，relay unit 的 ExecStart 消费；自动探测会原地改写此行（保留其他键）。*可用「探测 BMC IP」自动发现 |
+| `OBMC_SSH_TARGET` | 探测必填 | 跳板机 SSH 目标 `user@host`（BatchMode 免密）；不配则探测关闭，代理不受影响 |
 | `OBMC_SSH_PORT` | 否 | 跳板机 SSH 端口，默认 22 |
-| `OBMC_SUBNET` | 否 | 探测扫描的链路网段 `a.b.c`，缺省取 `BMC_TARGET` IP 的 /24 |
+| `OBMC_SUBNET` | 否 | 探测网段 `a.b.c`；缺省先取 `BMC_TARGET` IP 的 /24，连 BMC IP 都没有时，探测会在跳板机上自动枚举直连 IPv4 网段逐个扫 |
 | `OBMC_RELAY_PORT` | 否 | relay 本地监听端口，默认 18443，需与 relay unit 的 `-L` 参数一致 |
 
 代码本身不含任何站点相关默认值——你的网络拓扑只活在这份配置里（表单
-和 env 文件是同一份数据的两个入口）。DSH 自身的 3080、公网反代端口等
-属于 DSH/网关层，与本插件无关，无需在此配置。
+和 env 文件是同一份数据的两个入口）。真正必须由人类提供的只有跳板机
+这一项；DSH 自身的 3080、公网反代端口等属于 DSH/网关层，与本插件无关，
+无需在此配置。
 
 ## BMC IP 自动探测
 
 BMC 地址常由跳板侧 DHCP 动态分配，可能变化。当隧道目标失联（代理上游
 报错，或 `/bmc-status?probe=1` 实测失败）时，插件自动 SSH 到跳板机定位
 bmcweb 实际地址：先查 dnsmasq 租约表 + ARP 表（单纯换址时亚秒级返回），
-不通再做全网段 TCP-443 扫描；候选地址以 `/redfish/v1` 应答做指纹校验。
-找到后写回 env 文件的 `BMC_TARGET` 行、经 user manager 重启 relay，并
-通过隧道验证后才报告成功。手动触发：面板「重新探测 IP」按钮（即
+不通再对候选网段做 TCP-443 扫描；候选地址以 `/redfish/v1` 应答做指纹
+校验。探测网段的确定顺序：配置的 `OBMC_SUBNET` → `BMC_TARGET` IP 的
+/24 → 跳板机自身枚举的直连 IPv4 网段。找到后写回 env 文件的
+`BMC_TARGET` 行、经 user manager 重启 relay，并通过隧道验证后才报告
+成功。手动触发：部署配置里的「探测 BMC IP / 重新探测 IP」按钮（即
 `POST /bmc-status`），自带 60s 冷却。
 
 ## 安全说明
