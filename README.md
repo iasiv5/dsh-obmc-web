@@ -1,6 +1,7 @@
 # @iasiv5/dsh-obmc-web
 
-在 DSH GUI 里使用 **BMC Web UI**（OpenBMC / bmcweb，AST2700 EVB 实测）。
+在 DSH GUI 里使用 **BMC Web UI**（OpenBMC / bmcweb，AST2700 EVB 实测；
+插件本体于 DSH Web `0.1.7-rc.2` 实测）。
 host 半身在 DSH web 服务器的 GUI origin 上注册一组同源代理路由，经
 `obmc-web-relay.service`（SSH 本地转发，仅绑 `127.0.0.1`，端口默认
 18443、被占自动顺延）抵达 BMC；client 半身仿照 dsh-surf，在「设置」
@@ -104,7 +105,8 @@ BMC 地址常由跳板侧 DHCP 动态分配，可能变化。当隧道目标失�
 报错，或 `/bmc-status?probe=1` 实测失败）时，插件自动 SSH 到跳板机定位
 bmcweb 实际地址：先查 dnsmasq 租约表 + ARP 表（单纯换址时亚秒级返回），
 不通再对候选网段做 TCP-443 扫描；候选地址以 `/redfish/v1` 应答做指纹
-校验（200 或 401 都算 bmcweb 在场）。探测网段的确定顺序：配置的
+校验（200 需带 `"RedfishVersion"` 服务签名；401 保留原判；当选后的
+TLS 证书另经 TOFU 钉扎，见「安全说明」）。探测网段的确定顺序：配置的
 `OBMC_SUBNET` → `BMC_TARGET` IP 的 /24 → 跳板机自身枚举的直连 IPv4
 网段。找到后写回 env 文件的 `BMC_TARGET` 行、经 user manager 重启
 relay，并通过隧道验证后才报告成功；若 relay unit 尚未安装（首次
@@ -126,7 +128,18 @@ bootstrap），地址仍会写入配置并提示下一步去点「安装并启�
   是清空整个源的 Cookie 与存储——在同源代理下会连带清掉 GUI 自身的会话
   Cookie，把 DSH 一起登出；BMC 侧登出不受影响：显式的 `SESSION=` 过期
   Set-Cookie 照常透传，服务端会话照常销毁），CSP 仅移除
-  `frame-ancestors` 指令；其余（含 Cookie）原样透传。
+  `frame-ancestors` 指令；其余响应头原样透传。
+- 上行 Cookie 白名单（0.1.3 起）：GUI 源的 Cookie 不再整串透传给
+  BMC——只有 bmcweb 自己的 `SESSION` / `XSRF-TOKEN` 允许跨隧道，其余
+  （尤其 DSH 会话 Cookie `__Host-dsh_auth_session`）在上行前剥离，
+  BMC 这个信任域永远收不到 DSH 会话。
+- BMC TLS 证书 TOFU 钉扎（0.1.3 起）：隧道对端的自签证书按 `BMC_TARGET`
+  记录 SHA-256 指纹（`~/.config/systemd/user/obmc-relay-trust.json`，
+  `OBMC_WEB_TRUST` 可改址），首次见到即钉扎；此后指纹不符的交换会被
+  502 拒绝、旧指纹作废、下一次请求重新钉扎——静默中间人最多拿到一次
+  被拒的交换，且拿不到 Cookie。BMC 侧重生成证书同样自动重钉扎；如需
+  彻底重置删除上述文件即可。WS（KVM/控制台）路径同受保护——顺带修复
+  了该路径调用不存在的 `https.connect` 导致首个升级请求即崩的问题。
 - 非 `/login` 的上游 401 统一降级为 403：BMC SPA 的 axios 拦截器对其他
   401 会执行 `window.location = "/login"`——根绝对路径的顶层导航，在
   同源代理下会逃出 `/bmc` 前缀，落到 GUI 自己的 `/login` 并被认证门
