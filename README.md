@@ -1,7 +1,7 @@
 # @iasiv5/dsh-obmc-web
 
 在 DSH GUI 里使用 **BMC Web UI**（OpenBMC / bmcweb，AST2700 EVB 实测；
-插件本体于 DSH Web `0.1.7-rc.2` 实测）。
+插件本体于 DSH Web `0.1.7-rc.2` 与 `0.2.1-rc.2` 实测）。
 host 半身在 DSH web 服务器的 GUI origin 上注册一组同源代理路由，经
 `obmc-web-relay.service`（SSH 本地转发，仅绑 `127.0.0.1`，端口默认
 18443、被占自动顺延）抵达 BMC；client 半身仿照 dsh-surf，在「设置」
@@ -43,6 +43,20 @@ bmcweb 的 SPA 以根绝对路径引用资源与 API（`/js/…`、`/css/…`、
 hash 模式，因此挂在 `/bmc` 前缀下不会与 SPA 内部导航冲突。DSH web 服务器
 按「精确表优先、前缀最长者胜」分发，GUI 自身的路由永远优先；重复注册只
 跳过、不会让插件失败。
+
+## DSH 版本兼容
+
+- **版本门槛**：`0.2.1` 及以上宿主需 **≥0.1.4**——0.2.1 起宿主移除 `webRuntime`
+  服务（改名 `webStartup`），0.1.0–0.1.3 在其上会静默失效（插件 pending、路由 404）。
+  ≥0.1.4 采用非抛双服务解析（`webStartup` → `webRuntime` → `[]`），在
+  `0.1.x`–`0.2.1-rc.x` 宿主全线可用。本包不声明 `@deepseek-ai/dsh` 家族
+  peer，宿主版本守卫对其不设门槛，兼容范围以本节与市场文案为准。
+- **依赖的宿主契约面**：`webServer.register/registerUpgrade`（exact/prefix、
+  最长前缀分发）、客户端 `settings.section` slot、`slots` 客户端服务、
+  `window.__ModuleLoader__` 启动契约。配置走自有 `/bmc-config` 路由持久化，
+  不触宿主 settings/credentials。
+- **失效模式**：契约若在后续宿主版本变更，症状为设置面板消失（客户端 console
+  报错）或路由 404，不会损坏宿主、不会无声改写数据。
 
 ## 安装
 
