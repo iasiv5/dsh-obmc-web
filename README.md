@@ -171,3 +171,12 @@ bootstrap），地址仍会写入配置并提示下一步去点「安装并启�
 ## License
 
 [MIT](./LICENSE)
+
+## Trademarks
+
+`icon.svg` 复用 OpenBMC 项目的官方 logo（圆形徽记，去除字标）。OpenBMC 及其
+logo 版权归 OpenBMC community 所有，以
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) 发布（来源：
+[openbmc/webui-vue](https://github.com/openbmc/webui-vue)）。此处使用仅用于
+标识与本插件所对接的 OpenBMC 生态的兼容性，不构成 OpenBMC 项目对本插件的
+背书；OpenBMC 相关名称与标识的权利归属其各自所有者。
