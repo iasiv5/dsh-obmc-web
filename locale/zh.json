@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "OpenBMC Web 控制台（@iasiv5/dsh-obmc-web）",
+    "description": "一键打开 BMC Web UI，经 SSH 隧道同源代理访问。"
+  }
+}

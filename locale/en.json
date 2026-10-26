@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "OpenBMC Web Console (@iasiv5/dsh-obmc-web)",
+    "description": "Opens the BMC Web UI in one click over an SSH-tunneled same-origin proxy."
+  }
+}
