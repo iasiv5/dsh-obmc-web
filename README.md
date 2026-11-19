@@ -1,4 +1,5 @@
 # @iasiv5/dsh-obmc-web
+![DSH](https://img.shields.io/badge/DSH-0.2.2--rc.5%20verified-2563eb)
 
 在 DSH GUI 里使用 **BMC Web UI**（OpenBMC / bmcweb，AST2700 EVB 实测；
 插件本体于 DSH Web `0.1.7-rc.2` 与 `0.2.1-rc.2` 实测）。
