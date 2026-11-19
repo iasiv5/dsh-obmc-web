@@ -1,6 +1,6 @@
 {
   "name": "@iasiv5/dsh-obmc-web",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "OpenBMC 控制台：SSH 隧道一键开启，BMC IP 变化自动重定向；需 SSH 跳板连 BMC。版本无关，详见仓库。",
   "icon": "./icon.svg",
   "type": "module",
