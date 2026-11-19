@@ -1,5 +1,5 @@
 # @iasiv5/dsh-obmc-web
-![DSH](https://img.shields.io/badge/DSH-0.2.2--rc.5%20verified-2563eb)
+[![CI](https://img.shields.io/github/actions/workflow/status/iasiv5/dsh-obmc-web/ci.yml?branch=main&label=CI)](https://github.com/iasiv5/dsh-obmc-web/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/@iasiv5/dsh-obmc-web?label=npm)](https://www.npmjs.com/package/@iasiv5/dsh-obmc-web) [![License](https://img.shields.io/github/license/iasiv5/dsh-obmc-web?label=License)](./LICENSE) ![DSH](https://img.shields.io/badge/DSH-0.2.2--rc.5%20verified-2563eb)
 
 在 DSH GUI 里使用 **BMC Web UI**（OpenBMC / bmcweb，AST2700 EVB 实测；
 插件本体于 DSH Web `0.1.7-rc.2` 与 `0.2.1-rc.2` 实测）。
